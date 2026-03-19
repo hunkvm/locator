@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package locator.types;
+
+option go_package = "github.com/hunkvm/locator/pkg/proto/types";
+
+enum HealthStatus {
+  HEALTH_STATUS_UNSPECIFIED = 0;
+  HEALTH_STATUS_HEALTHY = 1;
+  HEALTH_STATUS_UNHEALTHY = 2;
+}
+
+message HealthConfig {
+  string service = 1;
+  string address = 2;
+}

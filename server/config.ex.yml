@@ -1,0 +1,88 @@
+listeners:
+  # Host and port this node listens on for client-facing service registry gRPC calls.
+  client: localhost:9991
+
+  # Host and port this node listens on for intra-cluster Raft RPC traffic.
+  peer: localhost:8881
+
+# Directory where this node stores its persistent state (raft log, snapshots,
+# state store). Each node in the cluster must use a separate directory.
+data-dir: ./data
+
+# Mutual TLS for service registration and xDS client connections (disabled by default).
+# When enabled, clients must present a certificate signed by ca-certificate-file.
+client-channel-security:
+  tls-policy: none                                     # none or mtls or tls
+#   ca-certificate-file: /etc/locator/certs/ca.crt     # PEM-encoded CA certificate (trust anchor)
+#   certificate-file: /etc/locator/certs/server.crt    # PEM-encoded server certificate
+#   private-key-file: /etc/locator/certs/server.key    # PEM-encoded private key
+#   refresh-interval: 5m                               # Hot-reload interval; 0 = disabled
+
+# Mutual TLS for intra-cluster Raft RPC (disabled by default).
+# When enabled, all peer connections require a certificate signed by ca-certificate-file.
+peer-channel-security:
+  tls-policy: none                                     # none or mtls or tls
+#   ca-certificate-file: /etc/locator/certs/ca.crt     # PEM-encoded CA certificate (trust anchor)
+#   certificate-file: /etc/locator/certs/node.crt      # PEM-encoded server certificate
+#   private-key-file: /etc/locator/certs/node.key      # PEM-encoded private key
+#   allowed-hostname: locator.local                    # Required hostname in peer certificate
+#   refresh-interval: 5m                               # Hot-reload interval; 0 = disabled
+
+raft:
+  # Unique numeric ID for this node in the cluster. Must be > 0 and match one of
+  # the IDs listed in peer-addrs.
+  node-id: 1
+
+  # Comma-separated list of all cluster nodes in <id>@<host>:<port> format.
+  # Every node must be included — including this node itself. IDs must be
+  # positive integers and must be consistent across all nodes.
+  # For development purposes, you can start a single-node cluster with:
+  # peer_addrs: 1@localhost:9991
+  # For production, use a list with multiple nodes:
+  # peer_addrs: 1@node1:9991,2@node2:9992,3@node3:9993
+  peer_addrs: 1@localhost:9991
+
+  # Number of heartbeat ticks that must pass without a leader heartbeat before
+  # a follower starts a new election. Higher values tolerate more network jitter
+  # but increase failover latency. Must be greater than heartbeat_tick (1).
+  # Default: 10
+  election_tick: 10
+
+  # Base interval between leader heartbeats. Controls how quickly followers
+  # detect a leader failure (roughly election_tick × heartbeat).
+  # Default: 100ms
+  heartbeat: 100ms
+
+  # Number of newly committed log entries after the last snapshot before this
+  # node takes a new snapshot. Lower values reduce recovery time after a restart
+  # but increase snapshot frequency and I/O. Default: 15
+  snapshot_count: 15
+
+  # Maximum number of entries a follower can be behind the leader before it
+  # receives a full snapshot instead of incremental log entries. Should be less
+  # than snapshot_count. Default: 10
+  catchup_entries: 10
+
+
+health_check:
+  # Timeout when establishing a connection to a monitored service endpoint
+  # before the check is considered failed.
+  min-connect-timeout: 5s
+
+  # Initial wait before retrying a failed health check.
+  min-backoff-duration: 1s
+
+  # Maximum wait between retries. Backoff grows up to this ceiling.
+  max-backoff-duration: 5m
+
+  # Number of consecutive failed health checks before a service is marked
+  # unhealthy and removed from the registry.
+  max-backoff-attempts: 3
+
+logger:
+  # Minimum log level to emit. One of: debug, info, warn, error.
+  level: debug
+
+  # Output format. Use "text" for human-readable output during development,
+  # "json" for structured output in production / log aggregation pipelines.
+  format: text
